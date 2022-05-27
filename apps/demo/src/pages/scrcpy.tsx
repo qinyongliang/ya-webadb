@@ -648,22 +648,23 @@ class ScrcpyPageState {
                     this.rendererContainer.firstChild.remove();
                 }
                 this.rendererContainer.appendChild(this.decoder.renderer);
-                this.decoder.renderer.addEventListener('touchmove',(e)=>{
+                this.decoder.renderer.addEventListener('touchmove', (e) => {
                     this.rendererContainer!.focus();
+                    e.preventDefault();
 
-                    for(let touch of e.changedTouches){
+                    for (let touch of e.changedTouches) {
                         const { x, y } = this.calculatePointerPosition(touch.clientX, touch.clientY);
-                        console.log("touch " + touch.identifier + "move to ",x ,y)
+                        console.log("touch " + touch.identifier + " move to ", x, y, touch)
                         this.client?.injectTouch({
                             action: AndroidMotionEventAction.Move,
-                            pointerId: BigInt(touch.identifier),
+                            pointerId: BigInt(-1),
                             pointerX: x,
                             pointerY: y,
                             pressure: 65535,
                             buttons: e.targetTouches.length,
                         });
                     }
-                },{ passive: true });        
+                }, { passive: false });
             }
         });
 
@@ -1123,7 +1124,7 @@ const NavigationBar = observer(function NavigationBar({
     className: string;
     style: CSSProperties;
     children: ReactNode;
-    }) {
+}) {
     if (!state.navigationBarVisible) {
         return (
             <div className={className} style={style}>{children}</div>
