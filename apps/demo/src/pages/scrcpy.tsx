@@ -648,6 +648,22 @@ class ScrcpyPageState {
                     this.rendererContainer.firstChild.remove();
                 }
                 this.rendererContainer.appendChild(this.decoder.renderer);
+                this.decoder.renderer.addEventListener('touchmove',(e)=>{
+                    this.rendererContainer!.focus();
+
+                    for(let touch of e.changedTouches){
+                        const { x, y } = this.calculatePointerPosition(touch.clientX, touch.clientY);
+                        console.log("touch " + touch.identifier + "move to ",x ,y)
+                        this.client?.injectTouch({
+                            action: AndroidMotionEventAction.Move,
+                            pointerId: BigInt(touch.identifier),
+                            pointerX: x,
+                            pointerY: y,
+                            pressure: 65535,
+                            buttons: e.targetTouches.length,
+                        });
+                    }
+                },{ passive: true });        
             }
         });
 
@@ -966,6 +982,7 @@ class ScrcpyPageState {
         }
 
         const { x, y } = this.calculatePointerPosition(e.clientX, e.clientY);
+        // console.log("move to ",x ,y,"buttons: " + e.buttons,"e.pressure: "+e.pressure * 65535)
         this.client.injectTouch({
             action,
             pointerId: e.pointerType === "mouse" ? BigInt(-1) : BigInt(e.pointerId),
